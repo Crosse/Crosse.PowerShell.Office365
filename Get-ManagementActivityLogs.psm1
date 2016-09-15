@@ -1,4 +1,5 @@
 ﻿#Requires -Version 5.0
+
 <#
     .SYNOPSIS
     Gets management activity logs from Office 365.
