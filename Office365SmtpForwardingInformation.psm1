@@ -728,11 +728,14 @@ function Send-ForwardingSummaryEmail {
             (Clicking on an e-ID will take you to the user's status page on it-acctmon.)
             Users with a check mark in the "Remediated?" column have had the following actions performed on their account:
             <ul>
+             <li>Account sign-in blocked</li>
               <li>Office 365 account password reset</li>
               <li>Mail forward removed</li>
               <li>Inbox rules that forward email disabled (if any)</li>
+              <li>Mail protocols disabled (includes ActiveSync, OWA, EWS, MAPI, POP3, IMAP4)</li>
               <!--<li>Multi-Factor Authentication enforced for their account</li>-->
             </ul>
+            Note: in about 60 minutes, the user accounts will be unblocked and all email protocols will be re-enabled.
             </div>
 
             <table cellpadding="5" border="1" class="accountsTable" id="compromisedAccountsTable">
