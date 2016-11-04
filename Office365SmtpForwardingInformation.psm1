@@ -455,7 +455,7 @@ function Send-ForwardingSummaryEmail {
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="initial-scale=1.0">
 <meta name="format-detection" content="telephone=no">
-<title>Compromised Dukes Report</title>
+<title>Compromised Office 365 Report</title>
 <style type="text/css">
     #outlook a {
         padding:0;
@@ -695,8 +695,8 @@ function Send-ForwardingSummaryEmail {
 
         # Only send these notifications to the first listed address.
         $To = $To[0]
-        $Subject = "No Compromised Dukes Account Detected and No New Forwards"
-        $SummaryHTML = "No Dukes accounts have been found using a duplicate forwarding address since $($LastRunTimestamp.ToString("f")). "
+        $Subject = "No Compromised Office 365 Accounts Detected and No New Forwards"
+        $SummaryHTML = "No Office 365 accounts have been found using a duplicate forwarding address since $($LastRunTimestamp.ToString("f")). "
         $SummaryHTML += "Additionally, no new mail forwards have been enabled or updated on any mailboxes."
     } else {
         # At least one duplicate forwarding address or new mail forward were found.
@@ -704,7 +704,7 @@ function Send-ForwardingSummaryEmail {
         # Get the summary right, first.
         $SummaryHTML = ""
         if ($CompromisedMailboxes.Count -gt 0) {
-            $SummaryHTML += "$($CompromisedMailboxes.Count) Dukes mailboxes are using duplicate forwarding addresses. "
+            $SummaryHTML += "$($CompromisedMailboxes.Count) Office 365 mailboxes are using duplicate forwarding addresses. "
         }
         if ($NewMailForwards.Count -gt 0) {
             if (![String]::IsNullOrEmpty($SummaryHTML)) {
@@ -717,15 +717,14 @@ function Send-ForwardingSummaryEmail {
 
         # Build up the compromised accounts table and summary.
         if ($CompromisedMailboxes.Count -gt 0) {
-            $Subject = "{0} Compromised Dukes Accounts Found" -f $CompromisedMailboxes.Count
+            $Subject = "{0} Compromised Office 365 Accounts Found" -f $CompromisedMailboxes.Count
 
             $CompromisedAccountsTableHTML = @"
             <h2>Duplicate Addresses</h2>
 
             <div class="tableSummary">
             The following table lists mailboxes that are forwarding to an address previously seen on another mailbox.
-            This most likely indicates that the mailbox has been compromised. 
-            (Clicking on an e-ID will take you to the user's status page on it-acctmon.)
+            This most likely indicates that the mailbox has been compromised.
             Users with a check mark in the "Remediated?" column have had the following actions performed on their account:
             <ul>
              <li>Account sign-in blocked</li>
@@ -758,7 +757,7 @@ function Send-ForwardingSummaryEmail {
                 $CompromisedAccountsTableHTML += @"
               <tr>
                 <td class="bodyStyle">
-                  <a href="https://it-acctmon.jmu.edu/userstatus/?USR_LOGIN={0}" target="_blank" text="Open {0} in AcctMon" style="text-decoration: none;">{0}</a>
+                  <span style="text-decoration: none;">{0}</span>
                 </td>
                 <td class="bodyStyle hide">
                   <span>{1}</span>
@@ -792,7 +791,6 @@ function Send-ForwardingSummaryEmail {
             The following table lists mailboxes that enabled mail forwarding during the reporting period.
             Note that this does not necessarily indicate that a mailbox has been compromised.
             However, if any addresses in this list appear ususual, they may require further investigation.
-            (Clicking on an e-ID will take you to the user's status page on it-acctmon.)
             </div>
 
             <table cellpadding="5" border="1" class="accountsTable" id="newForwardsTable">
@@ -809,7 +807,7 @@ function Send-ForwardingSummaryEmail {
                 $NewMailForwardsTableHTML += @"
               <tr>
                 <td class="bodyStyle">
-                  <a href="https://it-acctmon.jmu.edu/userstatus/?USR_LOGIN={0}" target="_blank" text="Open {0} in AcctMon" style="text-decoration: none;">{0}</a>
+                  <span style="text-decoration: none;">{0}</span>
                 </td>
                 <td class="hide bodyStyle">
                   {1}
