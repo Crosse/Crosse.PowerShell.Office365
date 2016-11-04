@@ -23,7 +23,7 @@
 There are a few ways to disable accounts in Office 365.
 
  * Use the [`Reset-CompromisedUser`](#reset-compromiseduser) command.
-   The [Remediation Steps](#remediation-steps) below details how to use this command.
+   The [examples](#examples) below detail how to use this command.
    *This is the recommended method to reset and disable accounts in Office 365 when using this module.*
 
  * Use the [`Block-Office365User`](#block-office365user) command.
@@ -144,7 +144,7 @@ Here are some examples showing how to remediate a compromised Office 365 account
     C:\PS> $session = New-Office365Session -Credential $cred -ConnectToAzureAD -ImportSession
     ```
 
- 1. Use the [`Reset-CompromisedUser`](#reset-compromiseduser)' command to remediate the user's account.
+ 1. Use the [`Reset-CompromisedUser`](#reset-compromiseduser) command to remediate the user's account.
     (Yes, in true PowerShell fashion, this is a lot of parameters.
     Copy & paste helps here, as does tab completion.
     Just type a dash, then hit <Tab> and cycle through the various command line parameters.)
@@ -162,9 +162,8 @@ Here are some examples showing how to remediate a compromised Office 365 account
     **Note**: The back-tick in the command above is PowerShell's line continuation character.
     You can type all of the options on the same line without the back-tick; I added it there for clarity since the line was too long.
 
- 1. You should not need to manually unblock a user.
-    The automated **[Check-Forwarding.ps1][check-forwarding]** script will automatically unblock users after their timeout period has elapsed.
-    (In the event that you do need to, see [`Unblock-Office365User`](#unblock-office365user) above.)
+ 1. You should not need to manually unblock a user if you are using the automated **[Check-Forwarding.ps1][check-forwarding]** script, which  will automatically unblock users after their timeout period has elapsed.
+    (In the event that you do need to manually unblock users, see [Manually Unblocking a User](#manually-unblocking-a-user) below.)
 
 
 ### Remediating Multiple Users at a Time
@@ -181,7 +180,10 @@ Here are some examples showing how to remediate a compromised Office 365 account
  1. Instead of running the command in step 6 above, pipe the contents of your text file into the command, like so:
 
     ```ps1
-    C:\PS> Get-Content mytextfile.txt | Reset-CompromisedUser -RemoveForwardingAddresses -DisableForwardingInboxRules -DisableProtocols -Session $session
+    C:\PS> Get-Content mytextfile.txt | `
+            Reset-CompromisedUser -RemoveForwardingAddresses `
+                                  -DisableForwardingInboxRules `
+                                  -DisableProtocols -Session $session
     ```
 
 ### Manually Unblocking a User
