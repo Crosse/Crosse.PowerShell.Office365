@@ -9,12 +9,12 @@
         - FirstSeen: A System.DateTime when the forwarding address was first seen on this mailbox
         - LastSeen: A System.DateTime when the forwarding address was last seen on this mailbox
         - Guid: The mailbox GUID
-    
+
     This database can be created using the Export-ForwardingDatabase cmdlet.
-        
+
     .EXAMPLE
     $db = Import-ForwardingDatabase -DatabaseFile .\forwarders.csv
-    
+
     This example shows how to import a mail-forwarding database from a file named forwarders.csv in the
     current directory.
 
@@ -38,14 +38,14 @@ function Import-ForwardingDatabase {
         $db = @()
     }
     Write-Verbose "Found $($db.Count) entries in the database."
-    
+
     # Convert all dates to DateTime objects.
     foreach ($row in $db) {
         $row.Guid = [Guid]$row.Guid
         $row.FirstSeen = [DateTime]$row.FirstSeen
         $row.LastSeen = [DateTime]$row.LastSeen
     }
-    
+
     return $db
 }
 
@@ -61,13 +61,13 @@ function Import-ForwardingDatabase {
         - FirstSeen: A System.DateTime when the forwarding address was first seen on this mailbox
         - LastSeen: A System.DateTime when the forwarding address was last seen on this mailbox
         - Guid: The mailbox GUID
-    
+
     This database can be imported using the Import-ForwardingDatabase cmdlet.
-        
+
     .EXAMPLE
     Export-ForwardingDatabase -DatabaseFile .\forwarders.csv -BackupExistingDatabase -Data $db -Verbose
-    
-    This command assumes that $db holds data from a previously-imported forwarding database, and/or data queried from 
+
+    This command assumes that $db holds data from a previously-imported forwarding database, and/or data queried from
     Exchange/Office365 using the Get-ForwardingMailbox and Update-ForwardingDatabase cmdlets.
 #>
 function Export-ForwardingDatabase {
@@ -78,7 +78,7 @@ function Export-ForwardingDatabase {
         [string]
         # The path where the database should be exported.
         $DatabaseFile="forwarders.csv",
-        
+
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [PSObject[]]
@@ -93,7 +93,7 @@ function Export-ForwardingDatabase {
     if ($BackupExistingDatabase -and (Test-Path $DatabaseFile)) {
         $fi = [System.IO.FileInfo](Resolve-Path $DatabaseFile).Path
         $backupFilename = "{0}\{1}-{2}{3}" -f $fi.DirectoryName, $fi.BaseName, [DateTime]::Now.ToString('yyyy-MM-ddThh_mm_ss'), $fi.Extension
-        
+
         Write-Verbose "Backing up current database file to $backupFilename"
         try {
             Copy-Item -Path $DatabaseFile -Destination $backupFilename -ErrorAction Stop
@@ -109,7 +109,7 @@ function Export-ForwardingDatabase {
         Write-Error "Cowardly refusing to write out a database that is smaller than the one on-disk."
         return
     }
-    
+
     Write-Verbose "Everything looks good: exporting database to $DatabaseFile"
     $Database | Export-Csv -NoTypeInformation -Encoding ASCII -Path $DatabaseFile
 }
@@ -118,16 +118,16 @@ function Export-ForwardingDatabase {
 <#
     .SYNOPSIS
     Creates a hash table lookup based on either a property or expression.
-    
+
     .DESCRIPTION
-    Creates a hash table "index" of a mail forwarding database (or any array of objects, really) using the 
+    Creates a hash table "index" of a mail forwarding database (or any array of objects, really) using the
     specified property or expression. This allows for quicker lookups instead of scanning the array.
-    
+
     .EXAMPLE
     $idx = New-ForwardingDatabaseIndex -Database $db -IndexByProperty ForwardingAddress
-    
+
     Creates a new hash table based on the array $db using the ForwardingAddress property as the key.
-    
+
     .EXAMPLE
     $idx = New-ForwardingDatabaseIndex -Database $db -IndexByExpression {param($row) $row.
 #>
@@ -139,26 +139,26 @@ function New-ForwardingDatabaseIndex {
         [PSObject[]]
         # A forwarding database.
         $Database,
-        
+
         [Parameter(Mandatory=$true,
           ParameterSetName="IndexByProperty")]
         [ValidateNotNullOrEmpty()]
         [string]
         # The property name on which to index.
         $IndexByProperty,
-        
+
         [Parameter(Mandatory=$true,
           ParameterSetName="IndexByExpression")]
         [ValidateNotNullOrEmpty()]
         [ScriptBlock]
         # An expression that returns the key on which data should be index.
         $IndexByExpression,
-        
+
         [switch]
         # Indicates whether a key may have multiple values. Mostly a hack.
         $AllowDuplicates = $false
     )
-    
+
     $idx = @{}
     foreach ($row in $Database) {
         if ($IndexByProperty) {
@@ -176,7 +176,7 @@ function New-ForwardingDatabaseIndex {
             $idx[$key] = $row
         }
     }
-    
+
     return $idx
 }
 
@@ -184,7 +184,7 @@ function New-ForwardingDatabaseIndex {
 <#
     .SYNOPSIS
     Updates a forwarding database with data returned from Get-ForwardingMailbox.
-    
+
     .DESCRIPTION
     Updates a forwarding database with data returned from Get-ForwardingMailbox. Returns a new database
     object. The object passed as the Database parameter should not be reused.
@@ -197,7 +197,7 @@ function Update-ForwardingDatabase {
         [PSObject[]]
         # A forwarding database.
         $Database,
-        
+
         [Parameter(Mandatory=$true,
             ValueFromPipeline=$true)]
         [ValidateNotNullOrEmpty()]
@@ -205,12 +205,12 @@ function Update-ForwardingDatabase {
         # Record to add or update in the forwarding database.
         $Record
     )
-    
+
     BEGIN {
-        Write-Verbose "Current database has $($Database.Count) records"        
+        Write-Verbose "Current database has $($Database.Count) records"
         $dbHash = New-ForwardingDatabaseIndex -Database $Database -IndexByProperty Guid
     }
-    
+
     PROCESS {
         foreach ($r in $Record) {
             if (!$r.ForwardingSmtpAddress.StartsWith("smtp")) {
@@ -244,7 +244,7 @@ function Update-ForwardingDatabase {
             }
         }
     }
-    
+
     END {
         Write-Verbose "Updated database has $($dbHash.Count) records"
         return $dbHash.Values
@@ -254,7 +254,7 @@ function Update-ForwardingDatabase {
 <#
     .SYNOPSIS
     Retrieves the last update timestamp from the database.
-    
+
     .DESCRIPTION
     Sorts the database by the LastSeen column and returns the latest timestamp seen.
 #>
@@ -268,14 +268,14 @@ function Get-ForwardingDatabaseLastUpdate {
         $Database
     )
     $Database | sort -Descending LastSeen | Select -First 1 -ExpandProperty LastSeen
-    
+
 }
 
 
 <#
     .SYNOPSIS
     Gets all mailboxes that have mail forwarding enabled.
-    
+
     .DESCRIPTION
     Gets all mailboxes that have mail forwarding enabled and returns the following information:
         - Name
@@ -295,14 +295,14 @@ function Get-ForwardingMailbox {
         # A valid, open Microsoft.Exchange session.
         $Session
     )
-    
+
     BEGIN {
         # Import only the command(s) we need.
         $oldPref = $VerbosePreference
         $VerbosePreference = "SilentlyContinue"
 
         Import-Module (Import-PSSession $Session -AllowClobber -CommandName "Get-Mailbox" -Verbose:$false) -Prefix Office365 -Verbose:$false
-        
+
         $VerbosePreference = $oldPref
     }
 
@@ -312,7 +312,7 @@ function Get-ForwardingMailbox {
         $mboxes = Get-Office365Mailbox -ResultSize Unlimited -Filter { ForwardingSmtpAddress -ne $null } |
             Select Name, DisplayName, ForwardingSmtpAddress, @{Name="Guid"; Expression={[Guid]$_.Guid}}, @{Name="Timestamp"; Expression={[DateTime]::Now}}
 
-        Write-Verbose "Found $($mboxes.Count) mailboxes with forwarding enabled"    
+        Write-Verbose "Found $($mboxes.Count) mailboxes with forwarding enabled"
         return $mboxes
     }
 }
@@ -322,7 +322,7 @@ function Get-ForwardingMailbox {
 <#
     .SYNOPSIS
     Queries a mail forwarding database for records that match the required criteria.
-    
+
     .DESCRIPTION
     Queries a mail forwarding database for records that match the required criteria.
 #>
@@ -337,13 +337,13 @@ function Get-ForwardingAddress {
         [PSObject[]]
         # A forwarding database.
         $Database,
-        
+
         [Parameter(Mandatory=$true,
           ParameterSetName="NewAddresses")]
         [DateTime]
         # Only return records newer than this timestamp, based on the FirstSeen field.
         $NewerThan,
-        
+
         [Parameter(Mandatory=$true,
           ParameterSetName="OldAddresses")]
         [ValidateNotNull()]
@@ -354,7 +354,7 @@ function Get-ForwardingAddress {
         [Parameter(Mandatory=$false)]
         [switch]
         $UseLastSeen = $false,
-        
+
         [Parameter(Mandatory=$false,
           ParameterSetName="NewAddresses")]
         [Parameter(Mandatory=$false,
@@ -363,7 +363,7 @@ function Get-ForwardingAddress {
         # Only return rows where the forwarding address is a duplicate.
         $OnlyDuplicates
     )
-    
+
     if ($OnlyDuplicates) {
         $idx = New-ForwardingDatabaseIndex -Database $Database -IndexByProperty ForwardingAddress -AllowDuplicates
         $multiples = @($idx.GetEnumerator() | ? { $_.Value.Count -gt 1 })
@@ -391,11 +391,11 @@ function Get-ForwardingAddress {
 <#
     .SYNOPSIS
     Sends an email summarizing data in a mail forwarding database.
-    
+
     .DESCRIPTION
     Sends an email summarizing data in a mail forwarding database. This cmdlet will consider
     data in the database where the "LastSeen" field is later than LastRunTimestamp.
-    
+
     If there is no new data within since LastRunTimestamp, a notification email will only be sent
     if AlwaysSendEmail is set to $true. In that case, an email will be sent to the first-listed adddress
     in the To parameter stating that there is nothing to report.
@@ -408,45 +408,45 @@ function Send-ForwardingSummaryEmail {
         [string]
         # Specifies the name of the SMTP server that sends the e-mail message.
         $SmtpServer = $PSEmailServer,
-        
+
         [Parameter(Mandatory=$false)]
         [ValidateNotNullOrEmpty()]
         [string]
         # Specifies the address from which the mail is sent. Enter a name (optional) and e-mail address, such as "Name <someone@example.com>".
         $From = (("{0}@{1}" -f [Environment]::UserName, [Environment]::UserDomainName).ToLower()),
-        
+
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [string[]]
         # Specifies the addresses to which the mail is sent. Enter names (optional) and the e-mail address, such as "Name <someone@example.com>".
         $To,
-        
+
         [Parameter(Mandatory=$true)]
         [DateTime]
         # A DateTime indicating the date range when report should begin.
         $LastRunTimestamp,
-        
+
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [PSObject[]]
         # A forwarding database.
         $Database,
-        
+
         [Parameter(Mandatory=$false)]
         [string[]]
         # Any remediated users.
         $RemediatedUsers,
-        
+
         [Parameter(Mandatory=$false)]
         [string]
         # Any additional text to add to the footer of the email.
         $FooterText,
-        
+
         [switch]
         # Indicates whether a status email should still be sent when there is no report data to send.
         $AlwaysSendEmail = $false
     )
-    
+
     $fontStack   = "'Open Sans', Arial, sans-serif;"
     $htmlBoilerPlate = @"
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -460,7 +460,7 @@ function Send-ForwardingSummaryEmail {
     #outlook a {
         padding:0;
     }
-    
+
     body {
         font-family: $fontStack;
         width:100% !important;
@@ -469,7 +469,7 @@ function Send-ForwardingSummaryEmail {
         margin: 0;
         padding:0;
     }
-    
+
     #bodyTable {
         font-family: $fontStack;
         width: 100% !important;
@@ -479,12 +479,12 @@ function Send-ForwardingSummaryEmail {
         margin: 0;
         padding: 0;
     }
-    
+
     #emailContainer {
         margin: 1em;
         padding-bottom: 1em;
     }
-    
+
     img {
         border: 0 none;
         height: auto;
@@ -492,30 +492,30 @@ function Send-ForwardingSummaryEmail {
         outline: none;
         text-decoration: none;
     }
-    
+
     a img {
         border: 0 none;
     }
-    
+
     table {
         mso-table-lspace: 0pt;
         mso-table-rspace: 0pt;
     }
-    
+
     table, td {
         border-collapse: collapse;
     }
-    
+
     h2 {
         font-family: $fontStack;
         font-weight: 800;
         font-size: 18px;
-        
+
         line-height: 20px;
         color: #000 !important;
         margin: 1em 0 0.5em 0;
     }
-    
+
     .ExternalClass { width: 100%; }
     .ExternalClass,
     .ExternalClass p,
@@ -534,7 +534,7 @@ function Send-ForwardingSummaryEmail {
         line-height: 22px;
         color: #c22e44;
     }
-    
+
     #footer {
         font-family: $fontStack;
         font-size:  9px;
@@ -543,10 +543,10 @@ function Send-ForwardingSummaryEmail {
 
         line-height: 14px;
         color: #000;
-        
+
         padding: 0.75em 0 0 0.5em;
     }
-    
+
     .bodyStyle {
         font-family: $fontStack;
         font-size: 14px;
@@ -556,7 +556,7 @@ function Send-ForwardingSummaryEmail {
         color: #000;
         margin-bottom: 0.5em;
     }
-    
+
     .accountsTable {
         font-family: $fontStack;
         font-size: 14px;
@@ -564,7 +564,7 @@ function Send-ForwardingSummaryEmail {
 
         line-height: 20px;
         color: #000;
-        
+
         min-width: 420px;
         margin: 1em 0 0 0.5em;
     }
@@ -575,18 +575,18 @@ function Send-ForwardingSummaryEmail {
         color: #000;
         background: #555;
     }
-    
+
     .tableHeader td {
         font-size: 16px;
         color: #fff;
     }
-    
+
     .killEmailAddress {
         text-decoration: none;
         pointer-events: none;
         cursor: default;
     }
-    
+
     .tableSummary {
         font-family: $fontStack;
         font-size: 14px;
@@ -597,7 +597,7 @@ function Send-ForwardingSummaryEmail {
 
         margin: 1em 0 0.75em 0.5em;
     }
-    
+
     /* Dear God, please forgive me for the hack that I am about to commit... */
     @media only screen and (max-device-width: 480px) {
         .accountsTable {
@@ -619,7 +619,7 @@ function Send-ForwardingSummaryEmail {
         padding: 0;
         margin: 0.5em 0 0 0.5em;
     }
-    
+
     #emailContainer {
         margin: 0.5em;
     }
@@ -627,7 +627,7 @@ function Send-ForwardingSummaryEmail {
     h2 {
         margin: 1.5em 0 1em 0;
     }
-    
+
     .accountsTable tr,
     .accountsTable td {
         padding: 0;
@@ -687,7 +687,7 @@ function Send-ForwardingSummaryEmail {
 
     if ($CompromisedMailboxes.Count -eq 0 -and $NewMailForwards.Count -eq 0) {
         # There have been no duplicate addresses and no new mail forwards since during the reporting period.
-        
+
         if (!$AlwaysSendEmail) {
             Write-Warning "No information to report for this reporting period, and -AlwaysSendEmail was not specified, so no email will be sent."
             return
@@ -700,7 +700,7 @@ function Send-ForwardingSummaryEmail {
         $SummaryHTML += "Additionally, no new mail forwards have been enabled or updated on any mailboxes."
     } else {
         # At least one duplicate forwarding address or new mail forward were found.
-        
+
         # Get the summary right, first.
         $SummaryHTML = ""
         if ($CompromisedMailboxes.Count -gt 0) {
@@ -770,7 +770,7 @@ function Send-ForwardingSummaryEmail {
               </tr>
 "@ -f $o.Name, $o.DisplayName, ($o.ForwardingAddress -replace '([\.@])', '<img src="" width="0" height="0">$1').Replace('smtp:', '')
             } # /foreach
-        
+
                 $CompromisedAccountsTableHTML += @"
             </table> <!-- compromisedAccountsTable -->
 "@
@@ -783,7 +783,7 @@ function Send-ForwardingSummaryEmail {
                 $Subject += ", and "
             }
             $Subject += "{0} New Mail Forwards Found" -f $NewMailForwards.Count
-            
+
             $NewMailForwardsTableHTML = @"
             <h2>New Mail Forwards</h2>
 
@@ -818,14 +818,14 @@ function Send-ForwardingSummaryEmail {
               </tr>
 "@ -f $o.Name, $o.DisplayName, ($o.ForwardingAddress -replace '([\.@])', '<img src="" width="0" height="0">$1').Replace('smtp:', '')
             } # /foreach
-        
+
                 $NewMailForwardsTableHTML += @"
             </table> <!-- newForwardsTable -->
 "@
         } # /new forwards
-        
+
     }
-    
+
     $Body = $htmlBoilerPlate.Replace("{{SummaryHTML}}", $SummaryHTML)
     $Body = $Body.Replace("{{CompromisedAccountsTableHTML}}", $CompromisedAccountsTableHTML)
     $Body = $Body.Replace("{{NewMailForwardsTableHTML}}", $NewMailForwardsTableHTML)
