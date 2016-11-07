@@ -1,5 +1,35 @@
 # Crosse.PowerShell.Office365
 
+This PowerShell module contains functions to connect to and ease administration of Exchange Online.
+The functions in this module fall into one of a few categories:
+
+* **Account Remediation**
+  * `Reset-CompromisedUser` — reset a compromised Office 365 user account
+  * `Block-Office365User` — block a user's access to their Office 365 resources
+  * `Unblock-Office365User` — unblock a user's access to their Office 365 resources
+  * [`scripts/Check-Forwarding.ps1`][check-forwarding] — automatable script that will monitor and remediate compromised accounts
+* **Mailbox SMTP Forward Monitoring**
+  * `Import-ForwardingDatabase` — imports a mail-forwarding database
+  * `Export-ForwardingDatabase` — exports mail-forwarding information to a database file
+  * `New-ForwardingDatabaseIndex` — creates a hash table lookup based on either a property or expression
+  * `Update-ForwardingDatabase` — updates a forwarding database with data returned from `Get-ForwardingMailbox`
+  * `Get-ForwardingDatabaseLastUpdate` — retrieves the last update timestamp from the database
+  * `Get-ForwardingMailbox` — gets all mailboxes that have mail forwarding enabled
+  * `Get-ForwardingAddress` — queries a mail forwarding database for records that match the required criteria
+  * `Send-ForwardingSummaryEmail` — sends an email summarizing data in a mail forwarding database
+* **Multi-Factor Authentication Management**
+  * `Enable-MultiFactorAuthentication` — enable MFA for an Office 365 user account
+  * `Get-MultiFactorAuthenticationSettings` — gets settings associated with MFA for an Office 365 user account
+  * `Get-SelfServicePasswordResetSettings` — gets SSPR settings associated for an Office 365 user account
+* **Logging**
+  * `Get-ManagementActivityLogs` — gets management activity logs from Office 365 using [Search-UnifiedAuditLog][]
+* **Session Management**
+  * `New-Office365Session` — creates a new Office365 session
+
+
+The bulk of this README concerns the commands in the first category, *Account Remediation*.
+For more information about the other commands, reading the source code is the best way to learn how they work.
+
 ## Requirements
 
 * At least PowerShell 5.0 (and WMF 5.0),
@@ -199,7 +229,7 @@ If you attempt to unblock a user in a situation where this would be required, th
 
 
 [c.p.exchange]: https://github.com/Crosse/Crosse.PowerShell.Exchange
-[check-forwarding]: scripts/Check-Forwarding.ps1
+[check-forwarding]: scripts/README.md
 [ecp]: https://outlook.office365.com/ecp/
 [enable-mfa]: Enable-MultiFactorAuthentication.psm1
 [get-credential]: https://technet.microsoft.com/en-us/library/hh849815.aspx
@@ -208,3 +238,4 @@ If you attempt to unblock a user in a situation where this would be required, th
 [install-module]: https://msdn.microsoft.com/en-us/library/dd878350(v=vs.85).aspx
 [msol]: https://msdn.microsoft.com/en-us/library/azure/jj151815(v=azure.98).aspx
 [oac]: https://portal.office.com/AdminPortal/Home
+[Search-UnifiedAuditLog]: https://technet.microsoft.com/en-us/library/mt238501
