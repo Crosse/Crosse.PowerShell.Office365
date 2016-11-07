@@ -27,14 +27,14 @@ There are a few ways to disable accounts in Office 365.
    *This is the recommended method to reset and disable accounts in Office 365 when using this module.*
 
  * Use the [`Block-Office365User`](#block-office365user) command.
-   This command does not reset the account password; as such, it is not a recommended method.
+   *This command blocks a user from signing in to their account, but does not reset their password.*
    (Note that `Reset-CompromisedUser` actually takes advantage of the `Block-Office365User` command to block sign-in and mail protocols, which is why `Reset-CompromisedUser` is the recommended method to fully reset and block compromised accounts.)
 
  * In the [Office Admin Center][oac], you can search for a user and toggle their "sign-in status".
-   This is not a recommended method.
+   *This method only blocks the user from logging in and does no other account mitigation.*
 
  * In the [Exchange Admin Center][ecp], you can search for a mailbox, go to "mailbox features", and toggle protocol access under the "Email Connectivity" section.
-  This is also not a recommended method.
+   *This method only blocks the user from using their mailbox, but does not remove their ability to use other features of Office 365.*
 
 
 ## Usage
