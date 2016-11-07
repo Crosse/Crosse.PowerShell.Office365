@@ -2,7 +2,7 @@
 
 ## Background
 
-The `Check-Forwarding.ps1` script is what JMU uses (via a scheduled task) to detect new and duplicate SMTP forwards in our Office 365 tenant domain.
+The [`Check-Forwarding.ps1`][check-forwarding] script is what JMU uses (via a scheduled task) to detect new and duplicate SMTP forwards in our Office 365 tenant domain.
 
 In order to release the script, I had to make a few changes to the script params and some other minor tweaks.
 The version of the script in this repository is **not** the same as the one we use in production, but it's pretty close.
