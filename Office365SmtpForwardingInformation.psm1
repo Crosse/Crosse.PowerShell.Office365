@@ -740,7 +740,7 @@ function Send-ForwardingSummaryEmail {
             <table cellpadding="5" border="1" class="accountsTable" id="compromisedAccountsTable">
               <thead>
                 <tr border="0" class="tableHeader">
-                  <td width="80px">e-ID</td>
+                  <td width="80px">User ID</td>
                   <td width="240px" class="tableHeader hide">Display Name</td>
                   <td width="240px" >Forwarding Address</td>
                   <td width="100px" align="center">Remediated?</td>
@@ -796,7 +796,7 @@ function Send-ForwardingSummaryEmail {
             <table cellpadding="5" border="1" class="accountsTable" id="newForwardsTable">
               <thead>
                 <tr border="0" class="tableHeader">
-                  <td>e-ID</td>
+                  <td>User ID</td>
                   <td class="hide">Display Name</td>
                   <td>Forwarding Address</td>
                 </tr>
